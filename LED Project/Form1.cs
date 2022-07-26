@@ -118,7 +118,7 @@ namespace LED_Project
             Thread childThread = new Thread(childRef);
 
             ThreadStart child2Ref = new ThreadStart(ColorChanger2);
-            Thread child2Thread = new Thread(child2Ref);
+            Thread child2Thread = new Thread(child2Ref); 
 
             childThread.Start();
             child2Thread.Start();
