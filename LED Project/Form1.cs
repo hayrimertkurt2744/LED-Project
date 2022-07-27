@@ -13,8 +13,14 @@ namespace LED_Project
 {
     public partial class Form1 : Form
     {
-      
-        
+        public delegate void CallBackColor(int code, string msg);
+        event CallBackColor CallBackColorEventHandler;
+        ThreadStart childRef;
+        Thread childThread;
+        ThreadStart child2Ref;
+        Thread child2Thread;
+
+
         Color currentColor = Color.Black;
         public Form1()
         {
@@ -31,31 +37,17 @@ namespace LED_Project
         
         private void ColorChanger(/*color color1*/)
         {
-            if (pictureBox1.InvokeRequired)
-            {
-                pictureBox1.BeginInvoke((MethodInvoker)delegate () {
-                    for (int i = 0; i < 10; i++)
-                    {
-                        Console.WriteLine("timer #1 :" + i + " seconds");
-                        pictureBox1.BackColor = SwapColor(pictureBox1.BackColor);//use delegate here
-                        Console.WriteLine(pictureBox1.BackColor);
-                        Thread.Sleep(1000);
-
-                    }
-                });
-            }
-            else
-            {
+            pictureBox1.BeginInvoke((MethodInvoker)delegate () {
                 for (int i = 0; i < 10; i++)
                 {
                     Console.WriteLine("timer #1 :" + i + " seconds");
                     pictureBox1.BackColor = SwapColor(pictureBox1.BackColor);//use delegate here
+                    //CallBackColorEventHandler.Invoke(1, "Blink 1");
                     Console.WriteLine(pictureBox1.BackColor);
                     Thread.Sleep(1000);
 
                 }
-            }
-
+            });
         }
 
         private void ColorChanger2(/*color color1*/)
@@ -67,27 +59,52 @@ namespace LED_Project
                     {
                         Console.WriteLine("timer #1 :" + i + " seconds");
                         pictureBox2.BackColor = SwapColor(pictureBox2.BackColor);//use delegate here
+                        //CallBackColorEventHandler.Invoke(2, "Blink2");
                         Console.WriteLine(pictureBox1.BackColor);
                         Thread.Sleep(1000);
 
                     }
                 });
             }
-            else
-            {
-                for (int i = 0; i < 10; i++)
-                {
-                    Console.WriteLine("timer #1 :" + i + " seconds");
-                    pictureBox2.BackColor = SwapColor(pictureBox2.BackColor);//use delegate here
-                    Console.WriteLine(pictureBox1.BackColor);
-                    Thread.Sleep(1000);
-
-                }
-            }
-           
-
         }
-
+        public void MyCallbackColor(int code,string msg) 
+        {
+            switch (code)
+            {
+                case 0:
+                    break;
+                case 1:
+                    if (pictureBox1.InvokeRequired)
+                    {
+                        pictureBox1.BeginInvoke((MethodInvoker)delegate () {
+                            this.pictureBox1.BackColor = SwapColor(pictureBox1.BackColor);
+                        });
+                        Console.WriteLine(msg);
+                    }
+                    else
+                    {
+                        pictureBox1.BackColor = SwapColor(pictureBox1.BackColor);
+                        Console.WriteLine(msg);
+                    }
+                    break;
+                case 2:
+                    if (pictureBox2.InvokeRequired)
+                    {
+                        pictureBox2.BeginInvoke((MethodInvoker)delegate () {
+                            this.pictureBox2.BackColor = SwapColor(pictureBox2.BackColor);
+                        });
+                        Console.WriteLine(msg);
+                    }
+                    else
+                    {
+                        pictureBox2.BackColor = SwapColor(pictureBox2.BackColor);
+                        Console.WriteLine(msg);
+                    }
+                    break;
+                default:
+                    break;
+            }
+        }
 
 
         private Color SwapColor(Color color1)
@@ -112,19 +129,20 @@ namespace LED_Project
         {
             Thread t = Thread.CurrentThread;
             t.Name = "Main Thread";
+            //CallBackColorEventHandler += MyCallbackColor;
 
             ThreadStart childRef = new ThreadStart(ColorChanger);
             //Console.WriteLine("In Main:Creating the Child thread");
             Thread childThread = new Thread(childRef);
 
             ThreadStart child2Ref = new ThreadStart(ColorChanger2);
-            Thread child2Thread = new Thread(child2Ref); 
-
+            Thread child2Thread = new Thread(child2Ref);
             childThread.Start();
             child2Thread.Start();
-            Console.WriteLine(t.Name);
+            Console.WriteLine(Thread.CurrentThread.Name);
             Console.ReadLine();
-            
+
+
             //onColorChange += ColorChanger;
             //onColorChange += ColorChanger1;
         }
@@ -149,8 +167,7 @@ namespace LED_Project
 
         private async void button1_Click(object sender, EventArgs e)
         {
-            //await Task.Run(() => { BlinkTheLed1(); });
-            //await Task.Run(() => { BlinkTheLed2(); });
+            
         }
 
         //private async task blinktheled1()
